@@ -1,0 +1,90 @@
+name: Android Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk wget unzip neko
+
+      - name: Install Haxe 4.2.5
+        run: |
+          wget https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-linux64.tar.gz
+          tar -xzf haxe-4.2.5-linux64.tar.gz
+          mv haxe_* haxe
+          sudo mv haxe /usr/local/
+          echo "/usr/local/haxe" >> $GITHUB_PATH
+
+      - name: Setup haxelib
+        run: |
+          mkdir -p ~/haxelib
+          haxelib setup ~/haxelib
+
+      - name: Run Codename Setup
+        run: |
+          haxe -cp commandline -D analyzer-optimize --run Main setup -s --no-vscheck
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK + NDK r21e
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" \
+                     "platforms;android-33" \
+                     "build-tools;33.0.2" \
+                     "ndk;21.4.7075529"
+
+      - name: Set Android Environment
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+
+      - name: Lock OpenFL + Lime Versions
+        run: |
+          haxelib install lime 8.1.2
+          haxelib install openfl 9.3.3
+          haxelib set lime 8.1.2
+          haxelib set openfl 9.3.3
+          haxelib install hxvlc 1.9.2
+          haxelib set hxvlc 1.9.2
+          
+
+      - name: Force Clean hxcpp
+        run: |
+         haxelib set hxcpp git
+         haxelib remove hxcpp 4.3.2
+
+      - name: Lime Setup Android
+        run: |
+          printf "%s\n%s\n%s\n" \
+          "$ANDROID_SDK_ROOT" \
+          "$ANDROID_NDK_ROOT" \
+          "$JAVA_HOME" \
+          | haxelib run lime setup android
+
+      - name: Show Installed Libraries
+        run: haxelib list
+
+      - name: Build Android
+        run: | 
+         haxelib run lime build android -DHXCPP_CLANG -DHXCPP_CPP11 --c-args="-Wno-inconsistent-missing-override -Wno-overloaded-virtual -Wno-unused-function"
+
+      - name: Find APK
+        run: find . -name "*.apk"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-Build
+          path: export/release/android/bin/app/build/outputs/apk/debug/*.apk
