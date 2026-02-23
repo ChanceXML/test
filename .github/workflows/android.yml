@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          haxelib run lime build android -release -DHXCPP_CLANG -DHXCPP_CPP11 --c-arg -Wno-inconsistent-missing-override
+          haxelib run lime build android
 
       - name: Find APK
         run: find . -name "*.apk"
