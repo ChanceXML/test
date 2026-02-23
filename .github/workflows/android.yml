@@ -46,16 +46,27 @@ jobs:
         run: |
           haxe -cp commandline -D analyzer-optimize --run Main setup -s
 
+      - name: Lime Setup Android
+        run: |
+          printf "%s\n%s\n%s\n" \
+          "$ANDROID_SDK_ROOT" \
+          "$ANDROID_NDK_ROOT" \
+          "$JAVA_HOME" \
+          | haxelib run lime setup android
+
       - name: Build Android APK
         run: |
           haxelib run lime build android -release -DHXCPP_CLANG -DHXCPP_CPP11 --c-arg -Wno-inconsistent-missing-override
 
-      - name: Upload Release APK
+      - name: Find APK
+        run: find . -name "*.apk"
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Codename Engine (APK)
-          path: export/release/android/bin/CodenameEngine.apk
-
+          name: Android-Build
+          path: export/release/android/bin/app/build/outputs/apk/debug/*.apk
+          
       - name: Clear existing cache
         uses: actions/github-script@v6
         with:
