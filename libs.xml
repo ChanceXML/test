@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<libraries checkVersion="update">
-
-  <if cond="all">
-    <print pretty="true">Installing stable Codename mobile setup...</print>
-
+<libraries checkVersion="update || all">
+	<if cond="update || all">
+		<print pretty="true">Preparing installation...</print>
+    
     <lib name="lime" version="8.1.2" />
-    <lib name="openfl" version="9.3.3" />
+    <git name="openfl" url="https://github.com/CodenameCrew/cne-openfl" ref="old" />
     <git name="hxcpp" url="https://github.com/CodenameCrew/cne-hxcpp" />
 
     <git name="flixel" url="https://github.com/CodenameCrew/cne-flixel" />
@@ -17,7 +16,7 @@
     <git name="funkin-modchart" url="https://github.com/TheoDevelops/FunkinModchart" ref="f30676579d8de7ccac7d12e13b664e8b2c42c6bf" skipDeps="true" />
 
     <git name="away3d" url="https://github.com/CodenameCrew/away3d" />
-    <git name="hxvlc" url="https://github.com/MAJigsaw77/hxvlc" />
+    <lib name="hxvlc" version="1.9.3" skipDeps="true" />
 
     <lib name="nape-haxe4" />
     <lib name="markdown" />
@@ -28,9 +27,11 @@
     <git name="extension-androidtools" url="https://github.com/LimeExtensions/extension-androidtools" />
   </if>
 
-  <if cond="build-hxcpp">
-    <print pretty="true">Rebuilding Hxcpp...</print>
-    <cmd dir="tools/hxcpp" cmd="haxe compile.hxml" />
-  </if>
+  <if cond="build-hxcpp || all">
+		<print pretty="true">Rebuilding Hxcpp...</print>
 
+		<!-- Build hxcpp -->
+		<cmd inLib="hxcpp" dir="tools/hxcpp" cmd="haxe compile.hxml" />
+	</if>
+  
 </libraries>
