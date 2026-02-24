@@ -47,6 +47,21 @@ jobs:
         run: |
           haxe -cp commandline -D analyzer-optimize --run Main setup -s
 
+      - name:
+        run: |
+         haxelib set lime 8.1.2
+         haxelib set openfl git
+         haxelib set hxcpp git
+         haxelib set flixel git
+         haxelib set flixel-addons git
+         haxelib set flixel-animate git
+         haxelib set hscript-improved git
+         haxelib set flxanimate git
+         haxelib set funkin-modchart git
+         haxelib set away3d git
+         haxelib set hxvlc 1.9.3
+         haxelib set extension-androidtools git
+
       - name: Lime Setup Android
         run: |
           printf "%s\n%s\n%s\n" \
